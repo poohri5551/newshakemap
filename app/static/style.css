@@ -138,7 +138,9 @@ html,body{
   position:fixed; left:12px;
   bottom:calc(64px + env(safe-area-inset-bottom, 0px));
   z-index:1002; padding:10px 12px; width:240px;
-  background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-1);
+  background: none !important;   /* ไม่ใช้พื้นหลัง */
+  border: none !important;       /* ไม่ใช้กรอบ */
+  box-shadow: none !important;   /* ไม่ใช้เงา */
 }
 .legend-title{ font-weight:600; font-size:12px; color:#000; margin-bottom:6px; }
 .legend-bar{ height:12px; border-radius:999px; border:1px solid rgba(0,0,0,.08) }
