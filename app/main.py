@@ -22,11 +22,7 @@ app = FastAPI(title="SHAKEMAP API", version="1.2.0")
 # CORS (เปิดกว้างสำหรับ dev)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://eqshakemap.pages.dev",
-        "https://map.shakemap.org",
-        "https://shakemap.org",          # <— เพิ่มบรรทัดนี้
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
