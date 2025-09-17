@@ -985,9 +985,18 @@
     })();
 
     // โหลดเหตุการณ์ล่าสุดอัตโนมัติเมื่อเปิดหน้า (ถ้าได้สิทธิ์ active)
+    
     window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => runCompute({ timer: false }), 300);
+      const runBtn = document.getElementById('runBtn');
+      runBtn.disabled = true;   // 🔒 บล็อกปุ่มไว้ก่อน
+      setTimeout(() => {
+        runCompute({ timer: false }).finally(() => {
+          runBtn.disabled = false;  // ✅ ปลดล็อกเมื่อโหลดเสร็จ
+        });
+      }, 300);
     });
+
+
   </script>
 </body>
 </html>
