@@ -67,15 +67,46 @@ def _compute_and_store() -> dict:
     return data
 
 def _get_or_compute(force: bool = False) -> dict:
-    # ถ้ามีแคชและไม่ force -> คืนเลย
-    if not force and _get_cached_ok():
-        return _CACHE["data"]
-    # กันชนกัน
-    with _CACHE_LOCK:
-        # เช็กซ้ำใน critical section กัน race
-        if not force and _get_cached_ok():
+    # 1) บังคับคำนวณใหม่
+    if force:
+        with _CACHE_LOCK:
+            return _compute_and_store()
+
+    # 2) ถ้ายังไม่มีแคช → คำนวณใหม่
+    if _CACHE["data"] is None:
+        with _CACHE_LOCK:
+            if _CACHE["data"] is None:
+                return _compute_and_store()
             return _CACHE["data"]
-        return _compute_and_store()
+
+    # 3) มีแคชแล้ว → เช็กว่ามี "เหตุการณ์ใหม่" ไหม (เปรียบเทียบ event_key)
+    try:
+        ev = fetch_latest_event_in_thailand()  # ดึง meta ล่าสุด (ไม่เรนเดอร์ภาพ)
+        if ev:
+            # สร้างคีย์จาก meta ล่าสุด
+            new_key = _make_event_key({
+                "time_utc":  ev.get("time_utc"),
+                "time_th":   ev.get("time_th"),
+                "lat":       ev.get("lat"),
+                "lon":       ev.get("lon"),
+                "mag":       ev.get("mag"),
+                "depth_km":  ev.get("depth"),
+            })
+            # ถ้าไม่ใช่เหตุการณ์เดิม → คำนวณใหม่ด้วย ev นี้
+            if new_key and new_key != _CACHE["event_key"]:
+                with _CACHE_LOCK:
+                    data = compute_overlay_from_event(ev)
+                    _CACHE["data"] = data
+                    _CACHE["event_key"] = new_key
+                    _CACHE["ts"] = time.time()
+                    return data
+    except Exception:
+        # ถ้าเช็ก meta ล้มเหลว ให้ใช้ของเดิมไปก่อน
+        pass
+
+    # 4) เหตุการณ์เดิม → ใช้แคช
+    return _CACHE["data"]
+
 
 
 # ================== Queue: จำกัดผู้ใช้พร้อมกัน 10 คน ==================
