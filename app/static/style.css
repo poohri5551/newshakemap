@@ -319,32 +319,3 @@ html,body{
 .search-results .item:last-child { border-bottom: 0; }
 .search-results .item:hover { background: rgba(0,0,0,0.04); }
 .hint { color: #667085; }
-
-/* --- Checklist alignment & beauty --- */
-.need-checklist{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.need-checklist label{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:15px;
-}
-.need-checklist input[type="checkbox"]{
-  width:18px;
-  height:18px;
-  margin:0;
-  accent-color:#4285f4; /* โทนเดียวกับปุ่มหลัก */
-}
-.need-checklist input[type="text"]{
-  margin-top:4px;
-  border:1px solid #dadce0;
-  border-radius:8px;
-  padding:8px 10px;
-  font-size:15px;
-  width:100%;
-}
-
-
