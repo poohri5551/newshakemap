@@ -193,8 +193,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
 
       <!-- Nickname -->
-      <button id="nickChip" class="chip-btn" type="button" title="ความช่วยเหลือ">
-        <span id="nickChipLabel">ความช่วยเหลือ</span>
+      <button id="nickChip" class="chip-btn" type="button" title="SOS">
+        <span id="nickChipLabel">SOS</span>
       </button>
 
       <!-- ปุ่มลอยขวาบน -->
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
 
-      <h3 class="modal-title">ความช่วยเหลือ</h3>
+      <h3 class="modal-title">SOS</h3>
       <form id="nickForm" class="modal-body">
         <div class="row">
           <label>ชื่อเล่นของฉัน
@@ -967,7 +967,7 @@ function updateUserMarkerPopup(){
       function refreshChip(){
         chipLabel.textContent = (currentNickname && currentNickname.trim())
           ? `ฉัน: ${currentNickname.trim()}`
-          : 'ความช่วยเหลือ';
+          : 'SOS';
       }
       function showNickModal(show=true){
         if (!modal) return;
