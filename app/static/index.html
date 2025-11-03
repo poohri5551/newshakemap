@@ -902,7 +902,7 @@ function updateUserMarkerPopup(){
     function saveNickname(nick){
       currentNickname=(nick||'').trim();
       try{ localStorage.setItem('nick', currentNickname); }catch(e){}
-      toast(currentNickname ? `บันทึกชื่อเล่น: ${currentNickname}` : 'ลบชื่อเล่นแล้ว');
+      toast(currentNickname ? `บันทึกสำเร็จ คุณ: ${currentNickname}` : 'ลบข้อมูลแล้ว');
     }
     window.addEventListener('DOMContentLoaded', () => { loadNickname(); });
 
