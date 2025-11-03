@@ -251,24 +251,29 @@ document.addEventListener('DOMContentLoaded', ()=>{
             <input id="nickModalInput" type="text" maxlength="24" placeholder="">
           </label>
         </div>
-        <!-- ต้องการความช่วยเหลือ (Dropdown แบบหลายตัวเลือก) -->
+
+        <!-- ต้องการความช่วยเหลือ -->
         <div class="field-group">
           <label class="label">ต้องการความช่วยเหลือ</label>
+
+          <!-- เช็กลิสต์ที่จัดแนวใหม่ + ฟิลด์อื่น ๆ -->
           <div class="need-checklist">
             <label><input type="checkbox" name="needs" value="medical"> การแพทย์/ยา</label>
             <label><input type="checkbox" name="needs" value="food"> อาหาร/เสบียง</label>
             <label><input type="checkbox" name="needs" value="water"> น้ำดื่ม</label>
-          
+
             <input type="text" id="needOtherInput" placeholder="พิมพ์เพิ่มเติม...">
           </div>
-        </div
-                <div class="modal-actions">
+        </div>
+
+        <div class="modal-actions">
           <button type="button" id="nickCancel" class="btn-secondary">ยกเลิก</button>
           <button type="submit" class="btn-primary">บันทึก</button>
         </div>
       </form>
     </div>
   </div>
+
 
   <!-- Modal: จำลองเหตุการณ์ -->
   <div id="simulateModal" class="modal-backdrop" style="display:none">
