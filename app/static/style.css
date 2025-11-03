@@ -319,3 +319,13 @@ html,body{
 .search-results .item:last-child { border-bottom: 0; }
 .search-results .item:hover { background: rgba(0,0,0,0.04); }
 .hint { color: #667085; }
+
+/* Modal ตาราง MMI–PGA */
+#mmiTableModal .modal {
+  width: 600px;
+  max-width: 90%;
+}
+#mmiTableModal img {
+  max-width: 100%;
+  border-radius: 8px;
+}
