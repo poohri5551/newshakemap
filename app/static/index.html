@@ -1374,6 +1374,51 @@ function updateUserMarkerPopup(){
         });
       }, 300);
     });
+    // === Modal แสดงตาราง MMI–PGA ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const legendBar = document.querySelector('.legend-bar');
+      const modal = document.getElementById('mmiTableModal');
+      const closeX = document.getElementById('mmiTableClose');
+      const closeBtn = document.getElementById('mmiTableCloseBtn');
+
+      if (legendBar) {
+        legendBar.style.cursor = 'pointer';
+        legendBar.title = 'คลิกเพื่อดูตาราง MMI–PGA';
+        legendBar.addEventListener('click', () => {
+          modal.style.display = 'flex';
+        });
+      }
+
+      [closeX, closeBtn].forEach(btn =>
+        btn?.addEventListener('click', () => modal.style.display = 'none')
+      );
+
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+    });
+
   </script>
+  <!-- Modal: ตาราง MMI–PGA -->
+    <div id="mmiTableModal" class="modal-backdrop" style="display:none">
+      <div class="modal" style="max-width:600px">
+        <button type="button" id="mmiTableClose" class="modal-close" aria-label="ปิด">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="modal-title">ตารางความสัมพันธ์ระหว่าง MMI และ PGA</h3>
+        <div class="modal-body" style="text-align:center">
+          <!-- แสดงรูปที่คุณให้มา -->
+          <img src="/static/mmi_pga_table.png" alt="MMI–PGA Table"
+              style="max-width:100%; border-radius:8px; box-shadow:0 0 6px rgba(0,0,0,.15)">
+          <p style="margin-top:8px; font-size:13px; color:#555">
+            ที่มา: USGS Standard Conversion (MMI–PGA)
+          </p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="mmiTableCloseBtn" class="btn-primary">ปิด</button>
+        </div>
+      </div>
+    </div>
+
 </body>
 </html>
