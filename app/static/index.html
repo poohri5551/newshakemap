@@ -159,21 +159,18 @@ function updateNeedToggleText(){
 
 /* ==== บันทึกชื่อเล่น + ความต้องการ ==== */
 function saveNicknameAndNeeds(){
-  const nickEl = document.getElementById('nickModalInput');
+  const nickEl = document.getElementById('nicknameInput') || document.querySelector('#nickname input, #nickInput');
   const nickname = nickEl ? nickEl.value.trim() : '';
+  const needs = getSelectedNeeds();
 
-  // อ่านค่าจาก checkbox ทั้งหมด
-  const checked = Array.from(document.querySelectorAll('input[name="needs"]:checked')).map(cb => cb.value);
-  const otherText = document.getElementById('needOtherInput')?.value.trim();
-  if (otherText) checked.push(otherText);
-
-  const profile = { nickname, needs: checked };
+  const profile = { nickname, needs };
   localStorage.setItem('shakemapProfile', JSON.stringify(profile));
 
   try{ updateUserMarkerPopup && updateUserMarkerPopup(); }catch(e){}
-  document.getElementById('nickModal')?.style.setProperty('display', 'none');
+  try{
+    (document.getElementById('nicknameModal') || document.querySelector('.nickname-modal'))?.classList.remove('open');
+  }catch(e){}
 }
-
 
 /* ==== Hook เมื่อโหลด ==== */
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -196,8 +193,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
 
       <!-- Nickname -->
-      <button id="nickChip" class="chip-btn" type="button" title="SOS">
-        <span id="nickChipLabel">SOS</span>
+      <button id="nickChip" class="chip-btn" type="button" title="ตั้งชื่อเล่น">
+        <span id="nickChipLabel">ตั้งชื่อเล่น</span>
       </button>
 
       <!-- ปุ่มลอยขวาบน -->
@@ -237,34 +234,47 @@ document.addEventListener('DOMContentLoaded', ()=>{
     <div class="legend-labels"></div>
   </div>
 
-  <!-- Modal: SOS -->
+  <!-- Modal: ตั้งชื่อเล่น -->
   <div id="nickModal" class="modal-backdrop" style="display:none">
     <div class="modal">
       <button type="button" id="nickCloseX" class="modal-close" aria-label="ปิด">
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
 
-      <h3 class="modal-title">SOS</h3>
+      <h3 class="modal-title">ตั้งชื่อเล่น</h3>
       <form id="nickForm" class="modal-body">
         <div class="row">
           <label>ชื่อเล่นของฉัน
             <input id="nickModalInput" type="text" maxlength="24" placeholder="">
           </label>
         </div>
+        <!-- ต้องการความช่วยเหลือ (Dropdown แบบหลายตัวเลือก) -->
+<div class="field-group">
+  <label class="label">ต้องการความช่วยเหลือ</label>
 
-        <!-- ต้องการความช่วยเหลือ -->
-        <div class="field-group">
-          <label class="label">ต้องการความช่วยเหลือ</label>
+  <div id="needDropdown" class="need-dd" data-open="false">
+    <button type="button" class="need-dd-toggle" aria-haspopup="listbox" aria-expanded="false">
+      <span class="need-dd-placeholder">เลือกความช่วยเหลือ…</span>
+      <span class="need-dd-count" hidden></span>
+      <svg class="need-dd-caret" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 10l5 5 5-5z"></path>
+      </svg>
+    </button>
 
-          <!-- เช็กลิสต์ที่จัดแนวใหม่ + ฟิลด์อื่น ๆ -->
-          <div class="need-checklist">
-            <label><input type="checkbox" name="needs" value="medical"> การแพทย์/ยา</label>
-            <label><input type="checkbox" name="needs" value="food"> อาหาร/เสบียง</label>
-            <label><input type="checkbox" name="needs" value="water"> น้ำดื่ม</label>
+    <div class="need-dd-menu" role="listbox" aria-multiselectable="true">
+      <div class="need-dd-search">
+        <input type="text" placeholder="ค้นหา…">
+      </div>
+      <ul class="need-dd-list"><!-- options จะถูกเติมด้วย JS --></ul>
+      <div class="need-dd-actions">
+        <button type="button" class="need-dd-clear">ล้าง</button>
+        <button type="button" class="need-dd-done">เสร็จสิ้น</button>
+      </div>
+    </div>
+  </div>
 
-            <input type="text" id="needOtherInput" placeholder="พิมพ์เพิ่มเติม...">
-          </div>
-        </div>
+  <div class="hint">เลือกได้หลายรายการ</div>
+</div>
 
         <div class="modal-actions">
           <button type="button" id="nickCancel" class="btn-secondary">ยกเลิก</button>
@@ -273,7 +283,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </form>
     </div>
   </div>
-
 
   <!-- Modal: จำลองเหตุการณ์ -->
   <div id="simulateModal" class="modal-backdrop" style="display:none">
@@ -958,7 +967,7 @@ function updateUserMarkerPopup(){
       function refreshChip(){
         chipLabel.textContent = (currentNickname && currentNickname.trim())
           ? `ฉัน: ${currentNickname.trim()}`
-          : 'SOS';
+          : 'ตั้งชื่อเล่น';
       }
       function showNickModal(show=true){
         if (!modal) return;
