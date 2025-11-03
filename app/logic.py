@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, ListedColormap, BoundaryNorm
 from scipy.interpolate import griddata   # ใช้เท่านี้พอ
 
 # ====== Interpolation switches ======
@@ -24,6 +24,28 @@ _HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (QuakePGA/1.0; +local)",
     "Accept-Language": "th,th-TH;q=0.9,en;q=0.8",
 }
+
+# ====== Custom PGA color bins (discrete) ======
+# เปิด/ปิดโหมดกำหนดช่วงสีเอง
+USE_CUSTOM_PGA_COLORS = True
+
+# ขอบเขตช่วง PGA (หน่วย %g) มี N+1 ค่า สำหรับสี N ช่วง (ตัวสุดท้ายใช้ inf ได้)
+PGA_BOUNDS = [0.0, 0.05, 0.3, 2.8, 6.2, 12, 22, 40, 75, 139, float("inf")]
+
+# สีของแต่ละช่วง (HEX) ยาวเท่ากับจำนวนช่วง = len(PGA_BOUNDS) - 1
+# โทนอ่อนเย็น → เขียว/ฟ้า เมื่อ PGA ต่ำ และร้อนขึ้นเมื่อค่าสูง
+PGA_COLORS = [
+    "#eaf2ff",  # <0.05
+    "#cfe3ff",  # 0.05–0.3
+    "#a6d8ff",  # 0.3–2.8
+    "#b7f0b7",  # 2.8–6.2
+    "#e9f57f",  # 6.2–12
+    "#ffe066",  # 12–22
+    "#ff9b40",  # 22–40
+    "#ff4d3a",  # 40–75
+    "#d8222a",  # 75–139
+    "#990000",  # ≥139
+]
 
 
 # -------------------- Utilities --------------------
@@ -233,7 +255,7 @@ def compute_overlay_from_event(ev: dict):
         changwat = changwat or c2
 
     # -------------------- กริดปลายทาง & กริดตัวอย่าง --------------------
-    half_box_deg = 2.0
+    half_box_deg = 2.0 + 1.0 * max(0.0, mag - 4.0)
     latmin = lat - half_box_deg
     latmax = lat + half_box_deg
     lonmin = lon - half_box_deg
@@ -278,28 +300,65 @@ def compute_overlay_from_event(ev: dict):
 
     pga_max = float(np.nanmax(masked_pga))
 
-    # ----- Legend (0 → pga_max) ใช้ colormap/normalize เดียวกับภาพ -----
-    import matplotlib.cm as cm
-    cmap = cm.get_cmap("jet")
-    vmin_show = 0.0
-    vmax_show = float(pga_max)
-    if not np.isfinite(vmax_show) or vmax_show <= vmin_show:
-        vmax_show = vmin_show + 1e-6  # กัน division-by-zero/flat image
-    norm_show = Normalize(vmin=vmin_show, vmax=vmax_show)
+    # ----- Legend/Colormap -----
+        # ----- Legend/Colormap -----
+    if USE_CUSTOM_PGA_COLORS:
+        # จัดการขอบเขตที่เป็นอินฟินิตี้สำหรับการแสดงผล legend
+        finite_bounds = [float(b) for b in PGA_BOUNDS if np.isfinite(b)]
+        # กำหนดช่วงแสดงผลสำหรับ legend
+        vmin_show = float(finite_bounds[0])
+        vmax_show = float(finite_bounds[-1]) if finite_bounds else float(pga_max) or 1e-6
 
-    tick_vals = np.linspace(vmin_show, vmax_show, 7)
-    def _to_hex(rgb):
-        r,g,b,a = rgb
-        return "#{:02x}{:02x}{:02x}".format(int(r*255), int(g*255), int(b*255))
-    legend = {
-        "units": "%g",
-        "min": float(vmin_show),
-        "max": float(vmax_show),
-        "stops": [
-            {"value": float(v), "color": _to_hex(cmap(norm_show(v)))}
-            for v in tick_vals
-        ],
-    }
+        cmap = ListedColormap(PGA_COLORS)
+        norm_show = BoundaryNorm(PGA_BOUNDS, cmap.N)
+
+        # mid-points เพื่อความเข้ากันได้กับโค้ดเดิมที่ใช้ stops
+        mids = []
+        for i in range(len(PGA_COLORS)):
+            lo = float(PGA_BOUNDS[i])
+            hi = PGA_BOUNDS[i+1]
+            if not np.isfinite(hi):
+                hi = vmax_show * 1.2   # ใช้ค่าสูงกว่าเล็กน้อยเพื่อคำนวณ mid
+            mids.append((float(lo) + float(hi)) / 2.0)
+
+        # **สำคัญ**: ทำ bounds ให้ JSON-safe (ห้ามมี inf)
+        bounds_out = []
+        for b in PGA_BOUNDS:
+            if np.isfinite(b):
+                bounds_out.append(float(b))
+            else:
+                bounds_out.append(float(vmax_show))  # แทน inf ด้วย vmax_show
+
+        legend = {
+            "units": "%g",
+            "min": float(vmin_show),
+            "max": float(vmax_show),
+            "mode": "discrete",
+            "bounds": bounds_out,      # ไม่มี inf แล้ว → JSON-safe
+            "colors": PGA_COLORS,
+            "stops": [{"value": float(m), "color": PGA_COLORS[i]} for i, m in enumerate(mids)],
+            "open_ended_last": True    # เผื่อ front-end อยากรู้ว่าช่วงสุดท้ายเดิมเป็น open-ended
+        }
+    else:
+        import matplotlib.cm as cm
+        cmap = cm.get_cmap("jet")
+        vmin_show = 0.0
+        vmax_show = float(pga_max)
+        if not np.isfinite(vmax_show) or vmax_show <= vmin_show:
+            vmax_show = vmin_show + 1e-6
+        norm_show = Normalize(vmin=vmin_show, vmax=vmax_show)
+
+        tick_vals = np.linspace(vmin_show, vmax_show, 7)
+        def _to_hex(rgb):
+            r,g,b,a = rgb
+            return "#{:02x}{:02x}{:02x}".format(int(r*255), int(g*255), int(b*255))
+        legend = {
+            "units": "%g",
+            "min": float(vmin_show),
+            "max": float(vmax_show),
+            "stops": [{"value": float(v), "color": _to_hex(cmap(norm_show(v)))} for v in tick_vals],
+        }
+
 
     # --- PGA grid points for nearest lookup ---
     pga_points = []
@@ -311,22 +370,43 @@ def compute_overlay_from_event(ev: dict):
                 "pga": float(masked_pga[i, j])
             })
 
-    # วาดภาพโปร่งใสเป็น PNG
-    fig, ax = plt.subplots(figsize=(8, 8), dpi=150)
-    norm = Normalize(vmin=vmin_show, vmax=vmax_show)
+    # วาดภาพโปร่งใสเป็น PNG (ใช้ cmap/norm จากด้านบน)
+    # === บันทึกรูปแบบที่กรอบภาพ = กรอบพิกัดเป๊ะ ===
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+
+    # แทน subplots ใช้ axes กินพื้นที่เต็มเฟรม 100% (ไม่มีขอบ/ไม่มี padding)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis("off")
+
     ax.imshow(
         masked_pga,
-        extent=[lonmin, lonmax, latmin, latmax],
+        extent=[lonmin, lonmax, latmin, latmax],   # x=lon, y=lat
         origin="lower",
-        cmap="jet",
-        norm=norm,
+        cmap=cmap,
+        norm=norm_show,
         alpha=0.55,
-        interpolation="bicubic"
+        interpolation="bicubic"   # จะเปลี่ยนเป็น "bilinear" ก็ได้ถ้าภาพเบลอเกิน
     )
-    ax.axis("off")
+
+    # ล็อคกรอบแกนให้ตรงกับ extent (กัน Matplotlib แอบขยับ)
+    ax.set_xlim(lonmin, lonmax)
+    ax.set_ylim(latmin, latmax)
+
+    # บันทึกแบบโปร่งใส โดย "ไม่ใช้" bbox_inches="tight"
     buf = io.BytesIO()
-    plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0, transparent=True)
+    fig.savefig(
+        buf,
+        format="png",
+        transparent=True,
+        facecolor="none",
+        edgecolor="none",
+        pad_inches=0
+    )
     plt.close(fig)
+    buf.seek(0)
+    b64 = base64.b64encode(buf.read()).decode("ascii")
+    data_url = f"data:image/png;base64,{b64}"
+
     buf.seek(0)
     b64 = base64.b64encode(buf.read()).decode("ascii")
     data_url = f"data:image/png;base64,{b64}"
@@ -404,3 +484,34 @@ def simulate_event(lat: float, lon: float, depth_km: float, mag: float, region_t
 def run_pipeline_manual(lat: float, lon: float, depth_km: float, mag: float, region_text: str | None = None):
     """ฟังก์ชันสะดวก ๆ สำหรับเรียกเหตุการณ์จำลองตรง ๆ"""
     return simulate_event(lat=lat, lon=lon, depth_km=depth_km, mag=mag, region_text=region_text)
+
+# PGA (%g) → MMI (Worden+2012)
+PGA_THRESH = [0.05, 0.3, 2.8, 6.2, 12, 22, 40, 75, 139]
+MMI_CODES  = ["I","II–III","IV","V","VI","VII","VIII","IX","X","X+"]
+TH_SHAKING = ["ไม่รู้สึก","อ่อนมาก–อ่อน","อ่อน","ปานกลาง","ค่อนข้างแรง",
+              "แรงมาก","รุนแรง","รุนแรงมาก","รุนแรงมาก (Violent)","รุนแรงที่สุด (Extreme)"]
+TH_DAMAGE  = ["ไม่มี","ไม่มี","ไม่มี","มีรอยแตกของผนังและกระจกหน้าต่างบ้างเล็กน้อย",
+    "ผนัง/เพดานร่วงหล่นบางจุด หน้าต่างบานเกร็ดแตกหรือร้าว",
+    "บ้าน/ตึกแถวที่ก่อสร้างไม่ได้มาตรฐานเริ่มเสียหายหนัก (ผนังแตกร้าว, เสาปูนบางต้นร้าว)"
+    ,"อาคารที่สร้างไม่แข็งแรง (บ้านก่ออิฐไม่เสริมเหล็ก, ตึกแถวเก่า) เสียหายหนัก บางส่วนอาจพังทลาย"
+    ,"อาคาร/บ้านเรือนที่ไม่ได้ออกแบบให้ทนแผ่นดินไหวเสียหายหนัก"
+    ,"อาคาร/บ้านเรือนพังถล่มเกือบทั้งหมด","อาคาร/บ้านเรือนพังถล่ม"]
+
+def mmi_from_pga(pga_percent_g: float):
+    """รับค่า PGA เป็นหน่วย %g แล้วคืน dict ข้อมูล MMI"""
+    idx = 0
+    while idx < len(PGA_THRESH) and pga_percent_g >= PGA_THRESH[idx]:
+        idx += 1
+    code   = MMI_CODES[idx]
+    shake  = TH_SHAKING[idx]
+    damage = TH_DAMAGE[idx]
+    lower  = 0 if idx == 0 else PGA_THRESH[idx-1]
+    upper  = float("inf") if idx == len(PGA_THRESH) else PGA_THRESH[idx]
+    range_text = f"< {PGA_THRESH[0]}%g" if idx == 0 else (f"≥ {lower}%g" if upper == float("inf") else f"{lower}–{upper}%g")
+    return {
+        "code": code,
+        "shake_th": shake,
+        "damage_th": damage,
+        "range_text": range_text,
+        "bin_index": idx
+    }
