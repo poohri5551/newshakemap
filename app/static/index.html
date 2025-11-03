@@ -175,8 +175,15 @@ function saveNicknameAndNeeds(){
 /* ==== Hook เมื่อโหลด ==== */
 document.addEventListener('DOMContentLoaded', ()=>{
   initNeedDropdown();
-  const btn = document.getElementById('nicknameSaveBtn') || document.querySelector('.nickname-save');
-  if(btn) btn.addEventListener('click', saveNicknameAndNeeds);
+
+  // ✅ กดบันทึกในฟอร์มตั้งชื่อเล่นให้เรียก saveNicknameAndNeeds()
+  const nickForm = document.getElementById('nickForm');
+  if (nickForm) {
+    nickForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      saveNicknameAndNeeds();
+    });
+  }
 });
 </script>
 
