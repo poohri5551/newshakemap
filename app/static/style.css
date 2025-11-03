@@ -319,3 +319,41 @@ html,body{
 .search-results .item:last-child { border-bottom: 0; }
 .search-results .item:hover { background: rgba(0,0,0,0.04); }
 .hint { color: #667085; }
+
+/* === Need multi-select dropdown === */
+.need-dd{ position:relative; display:block; }
+.need-dd-toggle{
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+  background:#fff; cursor:pointer; font-weight:600;
+}
+.need-dd-toggle:focus-visible{ outline:3px solid rgba(66,133,244,.25); outline-offset:2px; }
+.need-dd-placeholder{ overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.need-dd-count{
+  display:inline-flex; min-width:28px; height:24px; padding:0 8px; align-items:center; justify-content:center;
+  border-radius:999px; background:#eef4ff; color:var(--prim-strong); font-weight:700; font-size:12px;
+}
+.need-dd-caret{ flex:0 0 auto; opacity:.75 }
+.need-dd-menu{
+  position:absolute; left:0; right:0; top:calc(100% + 6px);
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  box-shadow:var(--shadow-2); display:none; z-index:3000;
+  max-height:260px; overflow:auto;
+}
+.need-dd[data-open="true"] .need-dd-menu{ display:block; }
+.need-dd-search{ padding:8px; border-bottom:1px solid #edf1f7; }
+.need-dd-search input{
+  width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px;
+}
+.need-dd-list{ list-style:none; margin:0; padding:6px 0; }
+.need-dd-list li{ padding:8px 12px; }
+.need-dd-list li label{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+.need-dd-list input[type="checkbox"]{ width:16px; height:16px; }
+.need-dd-actions{
+  display:flex; justify-content:space-between; gap:8px; padding:8px; border-top:1px dashed #edf1f7;
+}
+.need-dd-actions button{
+  border:0; border-radius:10px; padding:8px 12px; cursor:pointer; font-weight:600;
+}
+.need-dd-clear{ background:#f1f3f4; color:#202124; }
+.need-dd-done{ background:#eef4ff; color:var(--prim); }
