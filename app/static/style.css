@@ -1,4 +1,4 @@
-root{
+:root{
   --font:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   --bg:#f8f9fa; --text:#202124; --border:#dadce0;
   --prim:#4285f4; --prim-strong:#174ea6;
