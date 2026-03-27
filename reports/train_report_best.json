@@ -1,0 +1,65 @@
+{
+  "ok": true,
+  "selected_model": "rf",
+  "selection_metric": "lowest cv_mae",
+  "selected_cv_mae": 0.7282276504424661,
+  "n_rows": 951,
+  "n_events": 56,
+  "cv_strategy": "GroupKFold(5)",
+  "feature_columns_raw": [
+    "dist",
+    "pga",
+    "mag",
+    "lat",
+    "lon"
+  ],
+  "feature_columns_engineered": [
+    "dist",
+    "pga",
+    "log_dist",
+    "log_pga",
+    "inv_dist",
+    "dist_sq",
+    "log_dist_sq",
+    "pga_over_dist",
+    "mag",
+    "mag_x_log_dist",
+    "mag_x_log_pga",
+    "mag_over_log_dist1p",
+    "lat",
+    "lon",
+    "lat_lon"
+  ],
+  "results": {
+    "hgb": {
+      "model_name": "hgb",
+      "best_params": {
+        "min_samples_leaf": 3,
+        "max_iter": 200,
+        "max_depth": 4,
+        "learning_rate": 0.02,
+        "l2_regularization": 0.0
+      },
+      "best_cv_mae": 0.7531543824799163,
+      "cv_mae": 0.7531739959711741,
+      "cv_rmse": 0.9803017564042859,
+      "cv_acc_within_1": 0.868559411146162,
+      "cv_acc_exact": 0.4405888538380652
+    },
+    "rf": {
+      "model_name": "rf",
+      "best_params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 8,
+        "max_features": "sqrt",
+        "max_depth": 14
+      },
+      "best_cv_mae": 0.7281680554274679,
+      "cv_mae": 0.7282276504424661,
+      "cv_rmse": 0.9267224719776535,
+      "cv_acc_within_1": 0.8958990536277602,
+      "cv_acc_exact": 0.41009463722397477
+    }
+  },
+  "out_model": "models/mmi_best_model.joblib"
+}

@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "model_type": "classifier",
+  "n_rows": 951,
+  "cv_strategy": "GroupKFold(5) by event_id",
+  "feature_columns_raw": [
+    "dist",
+    "pga",
+    "mag",
+    "lat",
+    "lon"
+  ],
+  "feature_columns_engineered": [
+    "dist",
+    "pga",
+    "log_dist",
+    "log_pga",
+    "inv_dist",
+    "dist_sq",
+    "log_dist_sq",
+    "pga_over_dist",
+    "mag",
+    "mag_x_log_dist",
+    "mag_x_log_pga",
+    "mag_over_log_dist1p",
+    "lat",
+    "lon",
+    "lat_lon"
+  ],
+  "best_model_name": "hgb_cls",
+  "selection_metric": "cv_accuracy_exact",
+  "best_value": 0.5793901156677181,
+  "all_results": {
+    "rf_cls": {
+      "cv_mae": 0.7339642481598317,
+      "cv_rmse": 1.194096942415663,
+      "cv_accuracy_pm1": 0.7560462670872765,
+      "cv_accuracy_exact": 0.5520504731861199,
+      "best_params": {
+        "n_estimators": 500,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": "log2",
+        "max_depth": null
+      },
+      "best_search_score": 0.5522292642601269,
+      "cv_strategy": "GroupKFold(5) by event_id"
+    },
+    "et_cls": {
+      "cv_mae": 0.7497371188222923,
+      "cv_rmse": 1.2076691491969922,
+      "cv_accuracy_pm1": 0.7570977917981072,
+      "cv_accuracy_exact": 0.5394321766561514,
+      "best_params": {
+        "n_estimators": 500,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": "log2",
+        "max_depth": null
+      },
+      "best_search_score": 0.53958666299256,
+      "cv_strategy": "GroupKFold(5) by event_id"
+    },
+    "hgb_cls": {
+      "cv_mae": 0.668769716088328,
+      "cv_rmse": 1.1279826683531766,
+      "cv_accuracy_pm1": 0.7896950578338591,
+      "cv_accuracy_exact": 0.5793901156677181,
+      "best_params": {
+        "min_samples_leaf": 5,
+        "max_iter": 200,
+        "max_depth": 4,
+        "learning_rate": 0.02,
+        "l2_regularization": 0.01
+      },
+      "best_search_score": 0.5794433728299807,
+      "cv_strategy": "GroupKFold(5) by event_id"
+    }
+  },
+  "best_model_path": "app/models/bc77377ed1_mmi_classifier.joblib",
+  "uploaded_file": "app/uploads/bc77377ed1_data_all.csv"
+}
