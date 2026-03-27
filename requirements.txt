@@ -11,3 +11,4 @@ firebase-admin>=6.0.0
 google-api-python-client 
 google-auth
 scikit-learn
+python-multipart
